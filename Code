@@ -1,0 +1,147 @@
+import React, { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+
+const Dashboard = () => {
+  const [selectedPatient, setSelectedPatient] = useState(null);
+  const patientList = [
+    { name: "Emma Brown", dob: "12/05/1985", reason: "Routine", history: "Check-up every 6 months. Last visit: 02/2024" },
+    { name: "James Wilson", dob: "30/08/1972", reason: "Follow-up", history: "Tooth extraction in 2023. Complaints of sensitivity." },
+    { name: "Sarah Davis", dob: "14/01/1990", reason: "Teeth cleaning", history: "Scaling every year. No complaints." },
+    { name: "David Lee", dob: "26/09/1966", reason: "Toothache", history: "Root canal done in 2022. Needs monitoring." }
+  ];
+
+  const handlePatientClick = (patient) => setSelectedPatient(patient);
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 p-6">
+      <div className="col-span-1 lg:col-span-2 space-y-4">
+        <Card>
+          <CardContent className="p-4">
+            <h2 className="text-xl font-semibold mb-4">Practice Activity</h2>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="text-center">
+                <p className="text-sm text-gray-500">PRIVATE</p>
+                <p className="text-3xl font-bold">12</p>
+              </div>
+              <div className="text-center">
+                <p className="text-sm text-gray-500">NHS</p>
+                <p className="text-3xl font-bold">9</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Calendar</h2>
+              <Button>Send Invite</Button>
+            </div>
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>9:00 am - Emma Brown</span>
+                <span>30 mins</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span>10:00 am - James Wilson</span>
+                <span>30 mins</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span>11:00 am - Sarah Davis</span>
+                <span>30 mins</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span>1:00 pm - David Lee</span>
+                <span>60 mins</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <h2 className="text-xl font-semibold mb-4">Patients</h2>
+            <div className="space-y-2 text-sm">
+              {patientList.map((patient, idx) => (
+                <div key={idx} className="flex justify-between cursor-pointer hover:underline" onClick={() => handlePatientClick(patient)}>
+                  <span>{patient.name}</span>
+                  <span>{patient.dob}</span>
+                  <span>{patient.reason}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {selectedPatient && (
+          <Card>
+            <CardContent className="p-4">
+              <h2 className="text-xl font-semibold mb-2">Patient Details</h2>
+              <p><strong>Name:</strong> {selectedPatient.name}</p>
+              <p><strong>Date of Birth:</strong> {selectedPatient.dob}</p>
+              <p><strong>Visit Reason:</strong> {selectedPatient.reason}</p>
+              <p><strong>History:</strong> {selectedPatient.history}</p>
+            </CardContent>
+          </Card>
+        )}
+
+        <Card>
+          <CardContent className="p-4">
+            <h2 className="text-xl font-semibold mb-4">Digital Prescription</h2>
+            <form className="space-y-3">
+              <Input placeholder="Patient Name" />
+              <Input placeholder="Medication" />
+              <Textarea placeholder="Dosage & Instructions" />
+              <Button type="submit">Send Prescription</Button>
+            </form>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <h2 className="text-xl font-semibold mb-4">Clinical Notes</h2>
+            <form className="space-y-3">
+              <Input placeholder="Patient Name" />
+              <Textarea placeholder="Enter clinical notes here..." />
+              <Button type="submit">Save Note</Button>
+            </form>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <h2 className="text-xl font-semibold mb-4">NHS Activity Log</h2>
+            <form className="space-y-3">
+              <Input placeholder="Patient NHS Number" />
+              <Input placeholder="Treatment Type (e.g., Band 1, Band 2)" />
+              <Textarea placeholder="Procedure Notes" />
+              <Button type="submit">Submit to NHS</Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="space-y-4">
+        <Card>
+          <CardContent className="p-4">
+            <h2 className="text-xl font-semibold mb-4">Prescriptions</h2>
+            <div className="space-y-2 text-sm">
+              {patientList.map((patient, idx) => (
+                <div key={idx} className="flex justify-between">
+                  <span>{patient.name}</span>
+                  <span>{patient.dob}</span>
+                  <span>{patient.reason}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+};
+
+export default Dashboard;
