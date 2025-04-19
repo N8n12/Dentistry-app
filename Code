@@ -1,147 +1,67 @@
-import React, { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import streamlit as st
+import pandas as pd
 
-const Dashboard = () => {
-  const [selectedPatient, setSelectedPatient] = useState(null);
-  const patientList = [
-    { name: "Emma Brown", dob: "12/05/1985", reason: "Routine", history: "Check-up every 6 months. Last visit: 02/2024" },
-    { name: "James Wilson", dob: "30/08/1972", reason: "Follow-up", history: "Tooth extraction in 2023. Complaints of sensitivity." },
-    { name: "Sarah Davis", dob: "14/01/1990", reason: "Teeth cleaning", history: "Scaling every year. No complaints." },
-    { name: "David Lee", dob: "26/09/1966", reason: "Toothache", history: "Root canal done in 2022. Needs monitoring." }
-  ];
+# Simulated patient data
+patients = [
+    {"Name": "Emma Brown", "DOB": "12/05/1985", "Reason": "Routine", "History": "Check-up every 6 months."},
+    {"Name": "James Wilson", "DOB": "30/08/1972", "Reason": "Follow-up", "History": "Tooth extraction in 2023."},
+    {"Name": "Sarah Davis", "DOB": "14/01/1990", "Reason": "Teeth cleaning", "History": "Scaling every year."},
+    {"Name": "David Lee", "DOB": "26/09/1966", "Reason": "Toothache", "History": "Root canal done in 2022."}
+]
 
-  const handlePatientClick = (patient) => setSelectedPatient(patient);
+# Sidebar navigation
+st.sidebar.title("Dental Dashboard")
+page = st.sidebar.radio("Go to", ["Practice Overview", "Appointments", "Patients", "Prescriptions", "NHS Activity"])
 
-  return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 p-6">
-      <div className="col-span-1 lg:col-span-2 space-y-4">
-        <Card>
-          <CardContent className="p-4">
-            <h2 className="text-xl font-semibold mb-4">Practice Activity</h2>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="text-center">
-                <p className="text-sm text-gray-500">PRIVATE</p>
-                <p className="text-3xl font-bold">12</p>
-              </div>
-              <div className="text-center">
-                <p className="text-sm text-gray-500">NHS</p>
-                <p className="text-3xl font-bold">9</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+if page == "Practice Overview":
+    st.title("Practice Activity")
+    col1, col2 = st.columns(2)
+    col1.metric("Private", 12)
+    col2.metric("NHS", 9)
 
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Calendar</h2>
-              <Button>Send Invite</Button>
-            </div>
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>9:00 am - Emma Brown</span>
-                <span>30 mins</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>10:00 am - James Wilson</span>
-                <span>30 mins</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>11:00 am - Sarah Davis</span>
-                <span>30 mins</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>1:00 pm - David Lee</span>
-                <span>60 mins</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+elif page == "Appointments":
+    st.title("Today's Appointments")
+    appointments = pd.DataFrame([
+        {"Time": "9:00 AM", "Patient": "Emma Brown", "Duration": "30 mins"},
+        {"Time": "10:00 AM", "Patient": "James Wilson", "Duration": "30 mins"},
+        {"Time": "11:00 AM", "Patient": "Sarah Davis", "Duration": "30 mins"},
+        {"Time": "1:00 PM", "Patient": "David Lee", "Duration": "60 mins"}
+    ])
+    st.dataframe(appointments)
 
-        <Card>
-          <CardContent className="p-4">
-            <h2 className="text-xl font-semibold mb-4">Patients</h2>
-            <div className="space-y-2 text-sm">
-              {patientList.map((patient, idx) => (
-                <div key={idx} className="flex justify-between cursor-pointer hover:underline" onClick={() => handlePatientClick(patient)}>
-                  <span>{patient.name}</span>
-                  <span>{patient.dob}</span>
-                  <span>{patient.reason}</span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+elif page == "Patients":
+    st.title("Patient Records")
+    selected_name = st.selectbox("Select a patient", [p["Name"] for p in patients])
+    patient = next(p for p in patients if p["Name"] == selected_name)
+    st.subheader(f"Details for {selected_name}")
+    st.write(f"**DOB:** {patient['DOB']}")
+    st.write(f"**Visit Reason:** {patient['Reason']}")
+    st.write(f"**History:** {patient['History']}")
 
-        {selectedPatient && (
-          <Card>
-            <CardContent className="p-4">
-              <h2 className="text-xl font-semibold mb-2">Patient Details</h2>
-              <p><strong>Name:</strong> {selectedPatient.name}</p>
-              <p><strong>Date of Birth:</strong> {selectedPatient.dob}</p>
-              <p><strong>Visit Reason:</strong> {selectedPatient.reason}</p>
-              <p><strong>History:</strong> {selectedPatient.history}</p>
-            </CardContent>
-          </Card>
-        )}
+    st.markdown("---")
+    st.subheader("Add Clinical Notes")
+    with st.form("clinical_notes_form"):
+        notes = st.text_area("Notes")
+        submitted = st.form_submit_button("Save Note")
+        if submitted:
+            st.success("Note saved successfully.")
 
-        <Card>
-          <CardContent className="p-4">
-            <h2 className="text-xl font-semibold mb-4">Digital Prescription</h2>
-            <form className="space-y-3">
-              <Input placeholder="Patient Name" />
-              <Input placeholder="Medication" />
-              <Textarea placeholder="Dosage & Instructions" />
-              <Button type="submit">Send Prescription</Button>
-            </form>
-          </CardContent>
-        </Card>
+elif page == "Prescriptions":
+    st.title("Digital Prescription")
+    with st.form("prescription_form"):
+        patient_name = st.selectbox("Select patient", [p["Name"] for p in patients])
+        medication = st.text_input("Medication")
+        instructions = st.text_area("Dosage & Instructions")
+        submitted = st.form_submit_button("Send Prescription")
+        if submitted:
+            st.success(f"Prescription for {patient_name} sent successfully.")
 
-        <Card>
-          <CardContent className="p-4">
-            <h2 className="text-xl font-semibold mb-4">Clinical Notes</h2>
-            <form className="space-y-3">
-              <Input placeholder="Patient Name" />
-              <Textarea placeholder="Enter clinical notes here..." />
-              <Button type="submit">Save Note</Button>
-            </form>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <h2 className="text-xl font-semibold mb-4">NHS Activity Log</h2>
-            <form className="space-y-3">
-              <Input placeholder="Patient NHS Number" />
-              <Input placeholder="Treatment Type (e.g., Band 1, Band 2)" />
-              <Textarea placeholder="Procedure Notes" />
-              <Button type="submit">Submit to NHS</Button>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="space-y-4">
-        <Card>
-          <CardContent className="p-4">
-            <h2 className="text-xl font-semibold mb-4">Prescriptions</h2>
-            <div className="space-y-2 text-sm">
-              {patientList.map((patient, idx) => (
-                <div key={idx} className="flex justify-between">
-                  <span>{patient.name}</span>
-                  <span>{patient.dob}</span>
-                  <span>{patient.reason}</span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  );
-};
-
-export default Dashboard;
+elif page == "NHS Activity":
+    st.title("NHS Activity Log")
+    with st.form("nhs_form"):
+        nhs_number = st.text_input("Patient NHS Number")
+        treatment_type = st.selectbox("Treatment Type", ["Band 1", "Band 2", "Band 3"])
+        procedure_notes = st.text_area("Procedure Notes")
+        submitted = st.form_submit_button("Submit to NHS")
+        if submitted:
+            st.success("NHS activity submitted successfully.")
