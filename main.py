@@ -26,17 +26,12 @@ if "patients" not in st.session_state:
 # Set up page layout
 st.set_page_config(page_title="Dental Dashboard", layout="wide")
 
-# Create a carousel tab system using st.radio
-tabs = ['Practice Overview', 'Appointments', 'Patients', 'Prescriptions', 'NHS Activity', 'Billing', 'Add Patient', 'Settings']
-tab = st.selectbox("Select a section", tabs)
+# Create tabs using st.tabs
+tabs = ["Practice Overview", "Appointments", "Patients", "Prescriptions", "NHS Activity", "Billing", "Add Patient", "Settings"]
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs(tabs)
 
-# Helper function for spacing
-def vertical_spacer(lines=1):
-    for _ in range(lines):
-        st.write("\u200b")
-
-# Main Content for each page
-if tab == "Practice Overview":
+# Main Content for each tab
+with tab1:
     st.title("Practice Overview")
     col1, col2 = st.columns(2)
     with col1:
@@ -49,7 +44,7 @@ if tab == "Practice Overview":
     appts = pd.DataFrame(st.session_state.appointments)
     st.table(appts)
 
-elif tab == "Appointments":
+with tab2:
     st.title("Appointments")
     appointments = pd.DataFrame(st.session_state.appointments)
     st.dataframe(appointments, use_container_width=True)
@@ -74,7 +69,7 @@ elif tab == "Appointments":
             st.session_state.appointments.append(new_appointment)
             st.success("Appointment scheduled successfully.")
 
-elif tab == "Patients":
+with tab3:
     st.title("Patient Records")
     patient_name_search = st.text_input("Search by Name", key="search_name")
     filtered_patients = [p for p in st.session_state.patients if patient_name_search.lower() in p["Name"].lower()]
@@ -141,7 +136,60 @@ elif tab == "Patients":
             patient["Treatment History"].append(treatment_record)
             st.success("Treatment record added successfully.")
 
-elif tab == "Billing":
+with tab4:
+    st.title("Prescriptions")
+    
+    # Select a patient to prescribe
+    patient_name = st.selectbox("Select Patient", [p["Name"] for p in st.session_state.patients])
+
+    st.subheader("Create New Prescription")
+    with st.form("prescription_form"):
+        prescription_medicine = st.text_input("Medicine Name")
+        dosage = st.text_input("Dosage")
+        instructions = st.text_area("Instructions")
+        submitted = st.form_submit_button("Create Prescription")
+        if submitted:
+            new_prescription = {
+                "Patient": patient_name,
+                "Medicine": prescription_medicine,
+                "Dosage": dosage,
+                "Instructions": instructions,
+                "Date": datetime.today().strftime("%Y-%m-%d")
+            }
+            st.session_state.prescriptions.append(new_prescription)
+            st.success("Prescription created successfully.")
+
+    # Display prescriptions
+    st.subheader("Existing Prescriptions")
+    prescriptions_df = pd.DataFrame(st.session_state.prescriptions)
+    st.dataframe(prescriptions_df)
+
+with tab5:
+    st.title("NHS Activity")
+    
+    # NHS Activity form
+    st.subheader("Add NHS Activity Record")
+    with st.form("nhs_activity_form"):
+        patient_name = st.selectbox("Select Patient for NHS Activity", [p["Name"] for p in st.session_state.patients])
+        activity_type = st.selectbox("Activity Type", ["Consultation", "Treatment", "Follow-up", "Examination"])
+        duration = st.number_input("Duration (minutes)", min_value=0)
+        submitted = st.form_submit_button("Add NHS Activity")
+        if submitted:
+            new_activity = {
+                "Patient": patient_name,
+                "Activity Type": activity_type,
+                "Duration": duration,
+                "Date": datetime.today().strftime("%Y-%m-%d")
+            }
+            st.session_state.nhs_activity.append(new_activity)
+            st.success("NHS Activity added successfully.")
+
+    # Display NHS Activity
+    st.subheader("NHS Activity Records")
+    nhs_activity_df = pd.DataFrame(st.session_state.nhs_activity)
+    st.dataframe(nhs_activity_df)
+
+with tab6:
     st.title("Billing")
     selected_patient = st.selectbox("Select Patient for Billing", [p["Name"] for p in st.session_state.patients])
     patient = next(p for p in st.session_state.patients if p["Name"] == selected_patient)
@@ -167,7 +215,7 @@ elif tab == "Billing":
     bills_df = pd.DataFrame(st.session_state.bills)
     st.dataframe(bills_df)
 
-elif tab == "Add Patient":
+with tab7:
     st.title("Add New Patient")
     with st.form("add_patient_form"):
         new_name = st.text_input("Full Name")
@@ -189,7 +237,7 @@ elif tab == "Add Patient":
             st.session_state.patients.append(new_patient)
             st.success(f"Patient {new_name} added successfully.")
 
-elif tab == "Settings":
+with tab8:
     st.title("Practice Settings")
     st.markdown("Configure your practice's details.")
     practice_name = st.text_input("Practice Name", value="Dental Clinic")
