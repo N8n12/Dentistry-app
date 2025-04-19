@@ -1,8 +1,6 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
-import io
-import random
 
 # Initialize session state if not already done
 if "patients" not in st.session_state:
@@ -25,6 +23,38 @@ if "patients" not in st.session_state:
 
 # Set up page layout
 st.set_page_config(page_title="Dental Dashboard", layout="wide")
+
+# Custom styling for the app using Markdown
+st.markdown(
+    """
+    <style>
+    .main {
+        background-color: #f0f2f6;
+        color: #333;
+    }
+    .css-1aumxhk {
+        background-color: #6a1b9a;
+    }
+    .css-ffhzg2 {
+        color: #fff;
+    }
+    .stButton>button {
+        background-color: #8e24aa;
+        color: white;
+    }
+    .stButton>button:hover {
+        background-color: #9c27b0;
+    }
+    .css-1ck54k1 {
+        background-color: #6a1b9a;
+        color: white;
+    }
+    .css-15w1y93 {
+        background-color: #8e24aa;
+    }
+    </style>
+    """, unsafe_allow_html=True
+)
 
 # Create tabs using st.tabs
 tabs = ["Practice Overview", "Appointments", "Patients", "Prescriptions", "NHS Activity", "Billing", "Add Patient", "Settings"]
@@ -91,8 +121,10 @@ with tab3:
 
     st.markdown("---")
     st.subheader("Treatment History")
-    if patient["Treatment History"]:
-        st.write(patient["Treatment History"])
+    # Check if 'Treatment History' exists and has records
+    if patient.get("Treatment History"):
+        for record in patient["Treatment History"]:
+            st.write(f"- {record['Date']}: {record['Treatment Type']} - {record['Notes']}")
     else:
         st.write("No treatments recorded for this patient.")
     
@@ -120,6 +152,23 @@ with tab3:
             data=notes_to_export.to_csv(index=False),
             file_name=f"{selected_name}_notes.csv",
             mime="text/csv"
+        )
+
+    # Add new treatment entry
+    st.subheader("Add Treatment Record")
+    with st.form("add_treatment_form"):
+        treatment_date = st.date_input("Treatment Date")
+        treatment_type = st.selectbox("Treatment Type", ["Routine Check-up", "Follow-up", "Teeth Cleaning", "Tooth Extraction"])
+        treatment_notes = st.text_area("Treatment Notes")
+        submitted = st.form_submit_button("Save Treatment")
+        if submitted:
+            treatment_record = {
+                "Date": treatment_date.strftime("%Y-%m-%d"),
+                "Treatment Type": treatment_type,
+                "Notes": treatment_notes
+            }
+            patient["Treatment History"].append(treatment_record)
+            st.success("Treatment record added successfully.")
 
 with tab4:
     st.title("Prescriptions")
@@ -182,54 +231,44 @@ with tab6:
     st.subheader(f"Create Invoice for {selected_patient}")
     treatment_type = st.selectbox("Treatment Type", ["Private", "NHS"])
     total_amount = st.number_input("Total Amount", min_value=0.0, format="%.2f")
+    
+    # Add the invoice to the bill list
+    if st.button("Generate Invoice"):
+        new_invoice = {
+            "Patient": selected_patient,
+            "Treatment": treatment_type,
+            "Amount": total_amount,
+            "Date": datetime.today().strftime("%Y-%m-%d")
+        }
+        st.session_state.bills.append(new_invoice)
+        st.success("Invoice generated successfully.")
 
-    with st.form("billing_form"):
-        submitted = st.form_submit_button("Generate Bill")
-        if submitted:
-            new_bill = {
-                "Patient": selected_patient,
-                "Treatment Type": treatment_type,
-                "Amount": total_amount,
-                "Date": datetime.today().strftime("%Y-%m-%d")
-            }
-            st.session_state.bills.append(new_bill)
-            st.success("Invoice generated successfully.")
-
-    # Display generated bills
-    st.subheader("Generated Invoices")
-    bills_df = pd.DataFrame(st.session_state.bills)
-    st.dataframe(bills_df)
+    st.subheader("Billing History")
+    bill_df = pd.DataFrame(st.session_state.bills)
+    st.dataframe(bill_df)
 
 with tab7:
-    st.title("Add New Patient")
-    with st.form("add_patient_form"):
-        new_name = st.text_input("Full Name")
-        new_dob = st.date_input("Date of Birth")
-        new_reason = st.selectbox("Reason for Visit", ["Routine", "Follow-up", "Teeth cleaning", "Toothache", "Other"])
-        new_history = st.text_area("Medical History")
-        new_allergies = st.text_input("Allergies (if any)")
-
+    st.title("Add Patient")
+    st.subheader("Enter New Patient Details")
+    with st.form("new_patient_form"):
+        new_patient_name = st.text_input("Patient Name")
+        new_patient_dob = st.date_input("Date of Birth")
+        new_patient_reason = st.text_input("Reason for Visit")
+        new_patient_history = st.text_area("Medical History")
+        new_patient_allergies = st.text_area("Allergies")
         submitted = st.form_submit_button("Add Patient")
         if submitted:
             new_patient = {
-                "Name": new_name,
-                "DOB": new_dob.strftime("%d/%m/%Y"),
-                "Reason": new_reason,
-                "History": new_history,
-                "Allergies": new_allergies,
+                "Name": new_patient_name,
+                "DOB": new_patient_dob.strftime("%Y-%m-%d"),
+                "Reason": new_patient_reason,
+                "History": new_patient_history,
+                "Allergies": new_patient_allergies,
                 "Treatment History": []
             }
             st.session_state.patients.append(new_patient)
-            st.success(f"Patient {new_name} added successfully.")
+            st.success(f"Patient {new_patient_name} added successfully.")
 
 with tab8:
-    st.title("Practice Settings")
-    st.markdown("Configure your practice's details.")
-    practice_name = st.text_input("Practice Name", value="Dental Clinic")
-    practice_address = st.text_area("Practice Address")
-    contact_number = st.text_input("Contact Number")
-
-    with st.form("settings_form"):
-        submitted = st.form_submit_button("Save Settings")
-        if submitted:
-            st.success("Settings saved successfully.")
+    st.title("Settings")
+    st.write("Settings page to manage app configurations.")
