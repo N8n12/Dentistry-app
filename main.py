@@ -28,29 +28,78 @@ st.set_page_config(page_title="Dental Dashboard", layout="wide")
 st.markdown(
     """
     <style>
+    /* Global background and text color */
     .main {
-        background-color: #f0f2f6;
-        color: #333;
+        background-color: #f3f0fa;
+        color: #fff;
     }
+
+    /* Set purple for headers */
+    .css-ffhzg2 {
+        color: #ffffff !important;
+    }
+    
+    /* Styling for the sidebar and tabs */
     .css-1aumxhk {
-        background-color: #6a1b9a;
+        background-color: #7b1fa2;
     }
     .css-ffhzg2 {
         color: #fff;
     }
+    
+    /* Styling buttons */
     .stButton>button {
-        background-color: #8e24aa;
+        background-color: #9c27b0;
         color: white;
+        border: none;
+        border-radius: 5px;
     }
+
     .stButton>button:hover {
+        background-color: #ab47bc;
+    }
+
+    /* Form input styling */
+    .stTextInput input, .stTextArea textarea, .stNumberInput input, .stSelectbox select, .stDateInput input {
+        background-color: #9c27b0;
+        color: white;
+        border: 2px solid #7b1fa2;
+    }
+
+    /* Sidebar menu links */
+    .css-15w1y93 {
         background-color: #9c27b0;
     }
+
+    /* Styling for the header section */
     .css-1ck54k1 {
-        background-color: #6a1b9a;
+        background-color: #9c27b0;
         color: white;
     }
-    .css-15w1y93 {
-        background-color: #8e24aa;
+
+    /* Style for the table headers and rows */
+    .stTable th {
+        background-color: #7b1fa2;
+        color: white;
+    }
+
+    .stTable td {
+        background-color: #f3f0fa;
+        color: #333;
+    }
+
+    /* Specific styling for the tabs */
+    .stTab {
+        background-color: #9c27b0 !important;
+        color: white;
+        font-weight: bold;
+    }
+
+    /* Purple box around sections like forms and inputs */
+    .css-1d391kg {
+        border: 2px solid #9c27b0;
+        border-radius: 8px;
+        padding: 10px;
     }
     </style>
     """, unsafe_allow_html=True
@@ -225,23 +274,23 @@ with tab5:
 
 with tab6:
     st.title("Billing")
-    selected_patient = st.selectbox("Select Patient for Billing", [p["Name"] for p in st.session_state.patients])
-    patient = next(p for p in st.session_state.patients if p["Name"] == selected_patient)
-
-    st.subheader(f"Create Invoice for {selected_patient}")
-    treatment_type = st.selectbox("Treatment Type", ["Private", "NHS"])
-    total_amount = st.number_input("Total Amount", min_value=0.0, format="%.2f")
+    st.subheader("Generate an Invoice")
     
-    # Add the invoice to the bill list
-    if st.button("Generate Invoice"):
-        new_invoice = {
-            "Patient": selected_patient,
-            "Treatment": treatment_type,
-            "Amount": total_amount,
-            "Date": datetime.today().strftime("%Y-%m-%d")
-        }
-        st.session_state.bills.append(new_invoice)
-        st.success("Invoice generated successfully.")
+    # Billing form
+    with st.form("invoice_form"):
+        patient_name = st.selectbox("Select Patient for Invoice", [p["Name"] for p in st.session_state.patients])
+        treatment_type = st.selectbox("Treatment Type", ["Routine Check-up", "Follow-up", "Teeth Cleaning", "Tooth Extraction"])
+        treatment_cost = st.number_input("Treatment Cost", min_value=0.0)
+        submitted = st.form_submit_button("Generate Invoice")
+        if submitted:
+            new_invoice = {
+                "Patient": patient_name,
+                "Treatment": treatment_type,
+                "Amount": treatment_cost,
+                "Date": datetime.today().strftime("%Y-%m-%d")
+            }
+            st.session_state.bills.append(new_invoice)
+            st.success("Invoice generated successfully.")
 
     st.subheader("Billing History")
     bill_df = pd.DataFrame(st.session_state.bills)
