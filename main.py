@@ -26,18 +26,9 @@ if "patients" not in st.session_state:
 # Set up page layout
 st.set_page_config(page_title="Dental Dashboard", layout="wide")
 
-# Sidebar navigation with cleaner look
-st.sidebar.title("Dental Practice")
-page = st.sidebar.radio("Navigate", [
-    "Practice Overview", 
-    "Appointments", 
-    "Patients", 
-    "Prescriptions", 
-    "NHS Activity", 
-    "Billing",
-    "Add Patient",
-    "Settings"
-])
+# Create a carousel tab system using st.radio
+tabs = ['Practice Overview', 'Appointments', 'Patients', 'Prescriptions', 'NHS Activity', 'Billing', 'Add Patient', 'Settings']
+tab = st.selectbox("Select a section", tabs)
 
 # Helper function for spacing
 def vertical_spacer(lines=1):
@@ -45,7 +36,7 @@ def vertical_spacer(lines=1):
         st.write("\u200b")
 
 # Main Content for each page
-if page == "Practice Overview":
+if tab == "Practice Overview":
     st.title("Practice Overview")
     col1, col2 = st.columns(2)
     with col1:
@@ -58,7 +49,7 @@ if page == "Practice Overview":
     appts = pd.DataFrame(st.session_state.appointments)
     st.table(appts)
 
-elif page == "Appointments":
+elif tab == "Appointments":
     st.title("Appointments")
     appointments = pd.DataFrame(st.session_state.appointments)
     st.dataframe(appointments, use_container_width=True)
@@ -83,7 +74,7 @@ elif page == "Appointments":
             st.session_state.appointments.append(new_appointment)
             st.success("Appointment scheduled successfully.")
 
-elif page == "Patients":
+elif tab == "Patients":
     st.title("Patient Records")
     patient_name_search = st.text_input("Search by Name", key="search_name")
     filtered_patients = [p for p in st.session_state.patients if patient_name_search.lower() in p["Name"].lower()]
@@ -150,7 +141,7 @@ elif page == "Patients":
             patient["Treatment History"].append(treatment_record)
             st.success("Treatment record added successfully.")
 
-elif page == "Billing":
+elif tab == "Billing":
     st.title("Billing")
     selected_patient = st.selectbox("Select Patient for Billing", [p["Name"] for p in st.session_state.patients])
     patient = next(p for p in st.session_state.patients if p["Name"] == selected_patient)
@@ -176,7 +167,7 @@ elif page == "Billing":
     bills_df = pd.DataFrame(st.session_state.bills)
     st.dataframe(bills_df)
 
-elif page == "Add Patient":
+elif tab == "Add Patient":
     st.title("Add New Patient")
     with st.form("add_patient_form"):
         new_name = st.text_input("Full Name")
@@ -198,7 +189,7 @@ elif page == "Add Patient":
             st.session_state.patients.append(new_patient)
             st.success(f"Patient {new_name} added successfully.")
 
-elif page == "Settings":
+elif tab == "Settings":
     st.title("Practice Settings")
     st.markdown("Configure your practice's details.")
     practice_name = st.text_input("Practice Name", value="Dental Clinic")
