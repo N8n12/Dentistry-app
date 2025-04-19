@@ -85,7 +85,9 @@ with tab3:
     with col2:
         st.write(f"**Medical History:**")
         st.info(patient["History"])
-        st.write(f"**Allergies:** {patient['Allergies']}")
+        # Use .get() to avoid KeyError in case 'Allergies' is missing
+        allergies = patient.get("Allergies", "No allergies recorded")
+        st.write(f"**Allergies:** {allergies}")
 
     st.markdown("---")
     st.subheader("Treatment History")
