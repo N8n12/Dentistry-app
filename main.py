@@ -120,23 +120,6 @@ with tab3:
             data=notes_to_export.to_csv(index=False),
             file_name=f"{selected_name}_notes.csv",
             mime="text/csv"
-        )
-
-    # Add new treatment entry
-    st.subheader("Add Treatment Record")
-    with st.form("add_treatment_form"):
-        treatment_date = st.date_input("Treatment Date")
-        treatment_type = st.selectbox("Treatment Type", ["Routine Check-up", "Follow-up", "Teeth Cleaning", "Tooth Extraction"])
-        treatment_notes = st.text_area("Treatment Notes")
-        submitted = st.form_submit_button("Save Treatment")
-        if submitted:
-            treatment_record = {
-                "Date": treatment_date.strftime("%Y-%m-%d"),
-                "Treatment Type": treatment_type,
-                "Notes": treatment_notes
-            }
-            patient["Treatment History"].append(treatment_record)
-            st.success("Treatment record added successfully.")
 
 with tab4:
     st.title("Prescriptions")
