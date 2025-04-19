@@ -22,16 +22,15 @@ if "patients" not in st.session_state:
 # Set up page layout
 st.set_page_config(page_title="Dental Dashboard", layout="wide")
 
-# Sidebar navigation
-st.sidebar.title("Dental Dashboard")
+# Sidebar navigation with cleaner look
+st.sidebar.title("Dental Practice")
 page = st.sidebar.radio("Navigate", [
     "Practice Overview", 
     "Appointments", 
     "Patients", 
     "Prescriptions", 
     "NHS Activity", 
-    "Add Patient", 
-    "Analytics"
+    "Add Patient"
 ])
 
 # Helper function for spacing
@@ -39,13 +38,14 @@ def vertical_spacer(lines=1):
     for _ in range(lines):
         st.write("\u200b")
 
+# Main Content for each page
 if page == "Practice Overview":
-    st.title("Practice Activity Overview")
+    st.title("Practice Overview")
     col1, col2 = st.columns(2)
     with col1:
-        st.metric("Total Private Appointments", 12)
+        st.metric("Private Appointments", 12)
     with col2:
-        st.metric("Total NHS Appointments", 9)
+        st.metric("NHS Appointments", 9)
 
     st.markdown("---")
     st.subheader("Upcoming Appointments")
@@ -77,7 +77,7 @@ elif page == "Appointments":
 
 elif page == "Patients":
     st.title("Patient Records")
-    patient_name_search = st.text_input("Search by Name")
+    patient_name_search = st.text_input("Search by Name", key="search_name")
     filtered_patients = [p for p in st.session_state.patients if patient_name_search.lower() in p["Name"].lower()]
     
     selected_name = st.selectbox("Select a Patient", [p["Name"] for p in filtered_patients])
@@ -89,7 +89,7 @@ elif page == "Patients":
         st.write(f"**DOB:** {patient['DOB']}")
         st.write(f"**Reason for Visit:** {patient['Reason']}")
     with col2:
-        st.write(f"**History:**")
+        st.write(f"**Medical History:**")
         st.info(patient["History"])
 
     st.markdown("---")
@@ -160,28 +160,26 @@ elif page == "Add Patient":
             st.session_state.patients.append(new_patient)
             st.success(f"Patient {new_name} added successfully.")
 
-elif page == "Analytics":
-    st.title("Practice Analytics")
-    
-    # Patient visit statistics
-    total_visits = len(st.session_state.patients)
-    total_appointments = len(st.session_state.appointments)
-    total_prescriptions = len(st.session_state.prescriptions)
-    
-    st.subheader("Total Visits")
-    st.write(f"Total number of patient visits: {total_visits}")
-    
-    st.subheader("Total Appointments")
-    st.write(f"Total number of appointments: {total_appointments}")
-    
-    st.subheader("Prescriptions Overview")
-    st.write(f"Total number of prescriptions: {total_prescriptions}")
-    
-    # Plot appointment trends (simple bar chart)
-    appointment_dates = [appt["Date"] for appt in st.session_state.appointments]
-    appt_df = pd.DataFrame(appointment_dates, columns=["Date"])
-    appt_counts = appt_df.groupby("Date").size().reset_index(name="Appointments")
-    st.bar_chart(appt_counts.set_index("Date"))
-    
-    vertical_spacer(2)
-
+# Styling to improve the appearance
+st.markdown("""
+<style>
+    .block-container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+    }
+    .css-18e3th9 {
+        padding: 2rem 0.5rem;
+    }
+    .css-1v0mbdj {
+        padding: 1rem;
+    }
+    .css-12oz5g7 {
+        padding-top: 1rem;
+        padding-bottom: 2rem;
+    }
+    .css-1d391kg {
+        padding-top: 1rem;
+        padding-bottom: 2rem;
+    }
+</style>
+""", unsafe_allow_html=True)
